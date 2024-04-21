@@ -55,4 +55,14 @@ This is a three-day (9 hour) intensive workshop, with 6-7 hours of lectures and 
 ### Lecture 7: Nonlinear Models
 
 
+## Readings
+
+Here are selected readings that accompany the course.
+
+[Abdulkadiroglu, Angrist, Hull, and Pathak (2016)](Readings/Abdulkadiroglu_Angrist_Hull_Pathak_2016.pdf) 
+[Angrist and Krueger (1991)](Readings/Angrist_Krueger_1991.pdf) 
+[Dale and Krueger (2001)](Readings/Dale_Krueger_2001.pdf) 
+[Finkelstein (2007)](Readings/Finkelstein_2007.pdf) 
+
+
 
