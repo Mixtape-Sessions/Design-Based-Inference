@@ -24,12 +24,11 @@ This is a three-day (9 hour) intensive workshop, with 6-7 hours of lectures and 
 
 
 
-### Lecture 2: Design-Based IV
+### Lecture 2: Design vs. Outcome Models 
 
 
 
-### Lecture 3: Design vs. Outcome Models Application 1 Overview
-
+### Lecture 3: Design-Based IV
 
 
 ### Live-Coding Application 1
@@ -40,7 +39,7 @@ This is a three-day (9 hour) intensive workshop, with 6-7 hours of lectures and 
 
 
 
-### Lecture 5: Clustering Application 2 Overview
+### Lecture 5: Clustering 
 
 
 
