@@ -45,7 +45,7 @@ feols(
 
 # Check exclusion on athelete status ----
 feols(
-  athlete ~ i(yob), 
+  athlete ~ z + i(yob), 
   data = data_1980, vcov = "hc1"
 )
 
