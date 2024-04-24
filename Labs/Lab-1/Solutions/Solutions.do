@@ -4,8 +4,8 @@
 /****************************************/
 
 /* Install any needed packages */
-cap ssc install ranktest
-cap ssc install ivreg2
+* cap ssc install ranktest
+* cap ssc install ivreg2
 
 /* Setup data */
 clear all
@@ -25,7 +25,7 @@ ivreg2 pwage z i.yob if year==1980, r
 ivreg2 lwage (educ=z) pwage i.yob if year==1980, r
 
 /* Check exclusion on athelete status */
-ivreg2 athlete z i.yob if year==1980, r
+reg athlete z i.yob if year==1980, r
 
 /* New data IV and balance */
 ivreg2 lwage (educ=z) i.yob if year==2000, r
