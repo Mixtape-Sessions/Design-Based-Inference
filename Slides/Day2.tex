@@ -390,7 +390,7 @@ for ex-ante weights $\phi_i = E[\tilde{x}_ix_i\mid w_i,\beta_i]$
 \begin{frame}{Example: Project STAR}
 
 \begin{itemize}
-\item Krueger (1999) studies the STAR RCT, which randomized 12k students in 80 public elementary schools in Tennessee (!) to one of 3 classroom types:\smallskip
+\item Krueger (1999) studies the STAR RCT, which randomized 12k students in 80 public elementary schools in Tennessee to one of 3 classroom types:\smallskip
 \begin{enumerate}
 \item Regular-sized (20-25 students) -- Control\smallskip
 \item Small (13-17 students) -- Treatment 1\smallskip
@@ -464,7 +464,7 @@ where $\mathbf{Y}=\mathbf{X}\beta + \boldsymbol{\varepsilon}$ stacks observation
 
 \item In \emph{iid} data, we know $Var\left(\frac{1}{\sqrt{N}}\sum_i X_i\varepsilon_i\right)=\pause{}\frac{1}{N}\sum_i Var(X_i\varepsilon_i)=\pause{}E[X_iX_i^\prime\varepsilon_i^2]$\smallskip
 \begin{itemize}\pause{}
-\item This suggests $\widehat{Var}\left(\frac{1}{\sqrt{N}}\sum_i X_i\varepsilon_i^2\right)=\frac{1}{N}\sum_iX_iX_i^\prime\hat\varepsilon_i$, which leads to our usual heteroskedasticity-robust estimator
+\item This suggests $\widehat{Var}\left(\frac{1}{\sqrt{N}}\sum_i X_i\varepsilon_i^2\right)=\frac{1}{N}\sum_iX_iX_i^\prime\hat\varepsilon_i^2$, which leads to our usual heteroskedasticity-robust estimator
 \end{itemize}\bigskip\pause{}
 
 \item The motivation for alternative estimators comes from the possibility that $X_i\varepsilon_i$ and $X_j\varepsilon_j$ may be correlated for $i\neq j$\smallskip
