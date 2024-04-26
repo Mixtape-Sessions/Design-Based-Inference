@@ -31,10 +31,10 @@ summ smoked_r if smoked==1
 
 /* Richer controls */
 egen strata = group(blackm educm marm agem)
-reghdfe bweight smoked, absorb(strata)
+reghdfe bweight smoked, absorb(strata) vec(robust)
 
 /* Ex ante weights */
-reghdfe smoked, absorb(strata) resid
+reghdfe smoked, absorb(strata) resid vec(robust)
 predict smoked_bar, xbd
 gen num = smoked_bar*(1-smoked_bar)
 replace num = 0 if smoked_bar==.
