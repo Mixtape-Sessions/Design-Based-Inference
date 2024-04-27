@@ -423,7 +423,7 @@ Large effect for naive OLS goes away with recentering/controlling \smallskip
  y_i=& \mathbf{1}[\alpha+\beta x_i+\gamma w_i\ge\varepsilon_i],\hspace{0.3cm} \varepsilon_i\mid x_i,w_i\sim N(0,1) \\
 \pause{} \implies &  y_i(0)=\mathbf{1}[\alpha+\gamma w_i\ge \varepsilon_i],\hspace{0.2cm}y_i(1)=\mathbf{1}[\alpha+\beta + \gamma w_i\ge \varepsilon_i]
 \end{align*}\pause{}\vspace{-0.2cm}
-\item In particular, $E[y_i(1)-y_i(0)\mid w_i=1]=\Phi(\alpha+\beta+\gamma)-\phi(\alpha+\gamma)$ (will match OLS) but $E[y_i(1)-y_i(0)\mid w_i=0]=\Phi(\alpha+\beta)-\Phi(\alpha)$\smallskip\pause{}
+\item In particular, $E[y_i(1)-y_i(0)\mid w_i=1]=\Phi(\alpha+\beta+\gamma)-\Phi(\alpha+\gamma)$ (will match OLS) but $E[y_i(1)-y_i(0)\mid w_i=0]=\Phi(\alpha+\beta)-\Phi(\alpha)$\smallskip\pause{}
 \item Different extrapolation of missing CATE: a feature or a bug?
 \end{itemize}
 \end{itemize}
