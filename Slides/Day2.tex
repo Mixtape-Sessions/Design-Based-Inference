@@ -180,7 +180,7 @@
 \vspace{0.5cm}
 \title[]{Day 2: On Weights and Clusters}
 \author{Peter Hull}
-\date{Design-Based Regression Inference \\Spring 2024} 
+\date{Design-Based Regression Inference \\Fall 2024} 
 \titlepage {\small{}\ }\thispagestyle{empty} \vspace{-30pt}
 
 \end{frame}
@@ -210,21 +210,106 @@
 \end{itemize}
 \end{frame}
 
+\begin{frame}{Primer 1: Angrist (1998)}
+\vspace{0.2cm}
+\begin{itemize}
+\item Let $x_i\in\{0,1\}$; general causal model: $y_i=\underbrace{(y_i(1)-y_i(0))}_{\beta_i}x_i+\underbrace{y_i(0)}_{\varepsilon_i}$\smallskip
+\begin{itemize}
+\item Design: $x_i\mid w,y(0),y(1)\sim F_x(w_i)$ with linear $E[x_i\mid w_i]$ 
+\end{itemize}\bigskip\pause{}
+\item What does the $w_i$-controlled regression \emph{actually} identify? \pause{}
+\begin{align*}
+\beta&=\frac{Cov(\tilde{x}_i,y_i)}{Var(\tilde{x}_i)}=\pause{}\frac{Cov(\tilde{x}_i,x_i\beta_i)}{Var(\tilde{x}_i)}+\frac{Cov(\tilde{x}_i,\varepsilon_i)}{Var(\tilde{x}_i)}=\pause{}\frac{E[\tilde{x}_ix_i\beta_i]}{E[\tilde{x}_i^2]}
+\end{align*}\pause{}
+\item Further, $E[\tilde{x}_ix_i\beta_i]=E[E[\tilde{x}_ix_i\mid w, y(0),y(1)]\beta_i]=\pause{}E[Var(x_i\mid w)\beta_i]$ and $E[\tilde{x}_i^2]=\pause{}E[Var(x_i\mid w)]$\pause{}\medskip
+\item Hence the regression a proper (convex) weighted avg. of the $\beta_i$:
+\begin{align*}
+\beta=\frac{E[Var(x_i\mid w)\beta_i]}{E[Var(x_i\mid w)]}
+\end{align*}
+More weight put on observations with more treatment variability
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Primer 2: TWFE with Staggered Adoption}
+
+\begin{itemize}
+\item Now suppose we have a panel: $y_{it}=(y_{it}(1)-y_{it}(0))x_{it}+y_{it}(0)$\smallskip
+\begin{itemize}
+\item Units (non-randomly) adopt treatment over time: $x_{it}=\mathbf{1}[t\ge g_i]$ where  $g_i\in\{1,\dots,T\}\cup \infty$ gives adoption time ($g_i=\infty$ for never treated)
+\end{itemize}\pause{}\bigskip
+\item We assume parallel trends in $y_{it}(0)$ and run TWFE:
+\begin{align*}
+y_{it}=\beta x_{it}+\alpha_i+\tau_t+\nu_{it}
+\end{align*}
+If we start with a constant FX model, we'd be done!\pause{}\bigskip
+\item But notice something a bit weird here: we can run this regression even if there are no never-treated units ...
+\begin{itemize}
+\item How, then, is the regression using parallel trends in $y_{it}(0)$?
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Simple Staggered Adoption}
+\vspace{0.2cm}
+\begin{itemize}
+\item Consider $T=2$ and two groups: \emph{always-treated} units (with $g_i=1$; $x_{i1}=x_{i2}=1$) and \emph{switchers} (with $g_i=2$; $x_{i1}=0$, $x_{i2}=1$)\smallskip\pause{}
+\begin{itemize}
+\item We can use the usual two-period trick: $\Delta y_i = \tau + \beta^{OLS} \Delta x_i + \Delta \nu_i$, so $\beta^{OLS} = E[\Delta y_i\mid g_i=2]-E[\Delta y_i\mid g_i=1]$
+\end{itemize}\bigskip\pause{}
+
+\item Under PT, $E[y_{i2}(0)-y_{i1}(0)\mid g_i=1]=E[y_{i2}(0)-y_{i1}(0)\mid g_i=2]$ so:\smallskip
+\begin{align*}
+\beta  =& E[y_{i2}(1)-y_{i1}(0)\mid g_i=2]-E[y_{i2}(1)-y_{i1}(1)\mid g_i=1]\pause{} \\
+=&E[y_{i2}(1)-{\color{blue}{y_{i2}(0)}}\mid g_i=2] + E[{\color{blue}{y_{i2}(0)}}-y_{i1}(0)\mid g_i=2]\\
+& - E[y_{i2}(1)- {\color{red}{y_{i2}(0)}} \mid g_i=1] + E[y_{i1}(1)- {\color{red}{y_{i1}(0)}}\mid g_i=1]  \\
+& -{\color{red}{E[y_{i2}(0)}-y_{i1}(0)\mid g_i=1]} \pause{}\\
+=& \underbrace{E[y_{i2}(1)-y_{i2}(0)\mid g_i=2]}_{\text{ATE for switchers}} \\
+&-(\underbrace{E[y_{i2}(1)- y_{i2}(0) \mid g_i=1] - E[y_{i1}(1)- y_{i1}(0)\mid g_i=1]}_{\text{Change in ATE for always-treated}} )
+\end{align*}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{``Forbidden Comparisons,'' Illustrated}
+
+\vspace{0.7cm}
+\begin{center}
+	\includegraphics[width=0.65\textwidth]{figures/GB_1.png}
+\end{center}
+
+\end{frame}
+
+\begin{frame}{No Problem Under Constant Effects}
+
+\vspace{0.7cm}
+\begin{center}
+	\includegraphics[width=0.65\textwidth]{figures/GB_2.png}
+\end{center}
+
+\end{frame}
+
 \begin{frame}{Why So Negative?}
 
 \begin{itemize}
-\item A recent TWFE literature (e.g. de Chaisemartin and D'Haultfoeuille '20; Goodman-Bacon '21; Borusyak et al. '23) shows that some regressions identify $\beta = E[\psi_i \beta_i]/E[\psi_i]$ for possibly negative $\psi_i$\smallskip\pause{}
+\item We can write the previous expression as a \emph{non-convex} weighted average of $\beta_{it}=y_{it}(1)-y_{it}(0)$:
+\begin{align*}
+\beta=&E[\beta_{i2}\mid g_i=2] + E[\beta_{i2} \mid g_i=1] -  E[\beta_{i1}\mid g_i=1]\\ 
+=& \frac{E[\psi_{it}\beta_{it}]}{E[\psi_{it}]}\hspace{0.2cm}\text{ for }\psi_{it}=
+\begin{cases}
++, \text{ if }$t=2$\\
+0, \text{ if }$t=1, g=2$\\
+-, \text{ if }$t=1, g=1$\\
+\end{cases}
+\end{align*}\pause{}
+We'll term the $\psi_{it}$ ``ex-post'' weights, for reasons you'll see shortly\medskip\pause{}
+\item Why is negativity of $\psi_{it}$ a concern? The potential for \emph{sign reversals}:\smallskip
 \begin{itemize}
-\item We'll term these $\psi_i$ ``ex-post'' weights, for reasons you'll see shortly\bigskip\pause{}
-\end{itemize}
-\item Why is this a concern? The possibility of \emph{sign reversals}:\smallskip
+\item Even if all TEs are positive $\beta^{OLS}$ could end up negative (or vice versa) \smallskip\pause{}
+\item The recent TWFE literature points this issue out in many settings and proposes alternative specifications / procedures to address it
+\end{itemize}\medskip\pause{}
+\item It turns out that such $\psi_i$ also arise in design-based specifications, \\ and they can also be negative\smallskip
 \begin{itemize}
-\item Even if all $\beta_i$ are positive, $\beta$ could wind up negative (or vice versa) if $\psi_i$ and $\beta_i$ are correlated \smallskip
-\item The literature proposes alternative specifications/procedures that avoid negative weighting or allow for custom-built weights
-\end{itemize}\bigskip\pause{}
-\item It turns out that such $\psi_i$ also arise in design-based specifications, and they can also be negative\smallskip
-\begin{itemize}
-\item But sign reversals are impossible in design-based specs: then we also have $\beta=E[\phi_i\beta_i]/E[\phi_i]$ for ``ex-ante'' $\phi_i$ which are always non-negative
+\item But sign reversals are impossible in design-based specs: then we can also write $\beta=E[\phi_i\beta_i]/E[\phi_i]$ for ``ex-ante'' $\phi_i$ which are non-negative
 \end{itemize}
 \end{itemize}
 
@@ -241,13 +326,10 @@ for some outcome $y_i$, treatment $x_i$, and vector of controls $w_i$\bigskip\pa
 \begin{align*}
 y_i = \beta_i x_i + \varepsilon_i
 \end{align*}
-with heterogeneous effects $\beta_i$ and untreated potential outcomes $\varepsilon_i$\smallskip
-\begin{itemize}
-\item Note: for binary $x_i$ this is the more familiar $y_i=(y_i(1)-y_i(0))x_i + y_i(0)$
-\end{itemize}\medskip\pause{}
-\item Assume appropriate asymptotics for OLS to consistently estimate:
+with heterogeneous effects $\beta_i$ and untreated potential outcomes $\varepsilon_i$\medskip\pause{}
+\item In large enough samples, OLS consistently estimates:
 \begin{align*}
-\beta = \frac{E[\tilde{x}_i y_i]}{E[\tilde{x}_i^2]}=\frac{E[\tilde{x}_i x_i\beta]+E[\tilde{x}_i\varepsilon_i]}{E[\tilde{x}_i^2]}
+\beta = \frac{E[\tilde{x}_i y_i]}{E[\tilde{x}_i^2]}=\frac{E[\tilde{x}_i x_i\beta]}{E[\tilde{x}_i^2]}+\frac{E[\tilde{x}_i\varepsilon_i]}{E[\tilde{x}_i^2]}
 \end{align*}
 where $\tilde{x}_i$ are residuals from the population regression of $x_i$ on $w_i$
 \end{itemize}
@@ -280,7 +362,7 @@ treatment} $E[x_i\mid w_i]$ (e.g. the propensity score)\smallskip
 
 \item The second assumption yields a design-based OLS specification\smallskip
 \begin{itemize}
-\item Stronger (sufficient) condition: $x_i\mid (\varepsilon_i,\beta_i,w_i)\stackrel{iid}{\sim} G(w_i)$
+\item Stronger (sufficient) condition: $x_i\mid (\varepsilon_i,\beta_i,w_i)\stackrel{iid}{\sim} F_x(w_i)$
 \end{itemize}
 \end{itemize}
 
@@ -355,18 +437,38 @@ for ex-ante weights $\phi_i = E[\tilde{x}_ix_i\mid w_i,\beta_i]$
 \item Borusyak and Hull (2024) extend ex ante / ex post weights to:\smallskip
 \begin{enumerate}
 \item A more general causal model: potential outcomes $y_i(x)$ and $y_i=y_i(x_i)$\smallskip
-\item IV: design-based assumption is then $E[z_i\mid y_i(\cdot),w_i]=w_i^\prime\lambda$
-\end{enumerate}\bigskip\pause{}
+\item IV: design-based assumption is then $E[z_i\mid y_i(\cdot),w_i]=w_i^\prime\lambda$\smallskip
+\end{enumerate}
+Note implicit exclusion restriction: $y_i(\cdot)$ is indexed by $x$, not $z$\bigskip\pause{}
 \item For convex ex-ante weights in IV we require first-stage \emph{monotonicity}: that $x_i$ is non-decreasing in $z_i$ for all units regardless of $y_i(\cdot)$ \smallskip
 \begin{itemize}
 \item C.f. earlier results in Imbens and Angrist ('94, '95), Angrist et al. ('00)\smallskip\pause{}
 \item Ex post weights are still potentially non-convex under monotonicity 
 \end{itemize}\bigskip\pause{}
-\item Framework is general, allowing for ``formula'' IVs (e.g. shift-share)\smallskip
+\item Framework is general, allowing for ``formula'' IVs (e.g. shift-share) where the first stage relationship need not be causal \smallskip
 \begin{itemize}
-\item We'll see more about this in Friday's class
+\item We'll see more about this in tomorrow's class
 \end{itemize}
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Special Case: IV with Linear Heterogeneity}
+\begin{itemize}
+\item Suppose $y_i=\beta_i x_i+\varepsilon_i$ (without loss of generality for binary $x_i$). Then:
+\begin{align*}
+\beta =& \frac{Cov(\tilde{z}_i,y_i)}{Cov(\tilde{z}_i,x_i)} = \pause{} \frac{Cov(\tilde{z}_i,\beta_i x_i+\varepsilon_i)}{Cov(\tilde{z}_i,x_i)}=\pause{}\frac{E[\tilde{z}_ix_i\beta_i]}{E[\tilde{z}_ix_i]}\\
+=&\pause{} \frac{E[E[\tilde{z}_ix_i\mid w,\beta]\beta_i]}{E[E[\tilde{z}_ix_i\mid w,\beta]]}=\pause{}  \frac{E[Cov(z_i,x_i\mid w,\beta)\beta_i]}{E[Cov(z_i,x_i\mid w,\beta)]}\\
+=&\pause{}  \frac{E[\sigma_i\pi_i\beta_i]}{E[\sigma_i\pi_i]}
+\end{align*}
+where:
+\begin{align*}
+\sigma_i &= Var(z_i\mid w,\beta)\hspace{0.6cm}\text{$\implies$ more weight where $z_i$ varies more}\\
+\pi_i &= \frac{Cov(z_i,x_i\mid w,\beta)}{Var(z_i\mid w,\beta)}\text{$\implies$ more weight where the first stage is larger}
+\end{align*}\pause{}
+\item Reduces to Angrist '98 result if $z_i=x_i$ is fully independently assigned \pause{}\smallskip
+\item Reduces to Imbens-Angrist LATE result if the first stage is causal
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Multiple Treatments: Contamination Bias}
@@ -379,18 +481,127 @@ for ex-ante weights $\phi_i = E[\tilde{x}_ix_i\mid w_i,\beta_i]$
 \begin{enumerate}
 \item A weighted average of treatment $j$'s effects, with convex weights in design-based specifications $\checkmark$\smallskip\pause{}
 \item A non-convex combination of effects from other treatments $k$ (``contamination bias'') $\text{\sffamily X}$
-\end{enumerate}\bigskip\pause{}
-\item They derive alternative estimators which avoid contamination bias while maintaining the nice efficiency properties of OLS weighting\smallskip
+\end{enumerate}\pause{}\smallskip
+See also Sun and Abraham (2021) for earlier finding in event studies \bigskip\pause{}
+\item We derive alternative estimators which avoid contamination bias while maintaining some nice  properties of OLS weighting\smallskip
 \begin{itemize}
 \item Ultimately, becomes an empirical question of how important bias is
 \end{itemize}
 \end{itemize}
 \end{frame}
 
+\begin{frame}{General Problem}
+\vspace{0.2cm}
+\begin{itemize}
+\item Goldsmith-Pinkham et al. (2024) consider a partially linear regression:
+\begin{align*}
+y_i=\sum_k x_{ik}\beta_k +g(w_i)+u_i
+\end{align*}
+for mutually exclusive $x_{ik}\in\{0,1\}$ (usual regression: $g(w_i)=w_i^\prime\gamma$)
+\begin{itemize}\pause{}\smallskip
+\item Assume ``exogeneity'': $E[y_i(k)\mid x_i,w_i]=E[y_i(k)\mid w_i]$ for all $k$\smallskip
+\item Suppose $g(\cdot)$ is flexible enough to span either $E[y_i(0)\mid w_i]$ (e.g. parallel trends) or $p_k=E[x_{ik}\mid w_i]$ for all $k$ (i.e. design)
+\end{itemize}\bigskip\pause{}
+
+\item They show each regression coefficient $\beta_k$ can be decomposed:
+\begin{align*}
+\beta_k=E[\lambda_{kk}(w_i)\tau_k(w_i)]+\sum_{\ell\neq k}E[\lambda_{k\ell}(w_i)\tau_\ell(w_i)]
+\end{align*}\vspace{-0.3cm}
+
+for $\tau_k(w_i)=E[y_i(k)-y_i(0)\mid w_i]$, $\lambda_{kk}=\frac{E[\tilde{x}_{ik}x_{ik}\mid w_i]}{E[\tilde{x}_{ik}^2]}$, $\lambda_{k\ell}=\frac{E[\tilde{x}_{ik}x_{i\ell}\mid w_i]}{E[\tilde{x}_{ik}^2]}$; $\tilde{x}_{ik}$ is the residual from regressing $x_{ik}$ on $g(w_i)$ \emph{and} all other $x_{i,-k}$\smallskip
+\begin{itemize}
+\item $E[\lambda_{kk}(w_i)]=1$, $E[\lambda_{k\ell}(w_i)]=0$. Further $\lambda_{kk}(w_i)\ge 0$ if $g(\cdot)$ spans $p_k$
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Unpacking The Result}
+\vspace{-0.7cm}
+\begin{align*}
+\beta_k=\underbrace{E[\lambda_{kk}(w_i)\tau_k(w_i)]}_{\text{Own treatment effect}}+\sum_{\ell\neq k}\underbrace{E[\lambda_{k\ell}(w_i)\tau_\ell(w_i)]}_{\text{Contamination bias}}
+\end{align*}
+\begin{itemize}
+\item $E[\lambda_{kk}(w_i)]=1$, $E[\lambda_{k\ell}(w_i)]=0$. If [(*) $g(\cdot)$ spans $p_k$], $\lambda_{kk}(w_i)\ge 0$  \smallskip\pause{}
+\begin{itemize}
+\item (*) corresponds to a ``design-based'' regression: No negative own-treatment weights (generalizing Angrist '98 further)\smallskip\pause{}
+\item Unless $\lambda_{k\ell}=0$ identically, there's potential for contamination bias 
+\end{itemize}\bigskip\pause{}
+
+\item Intuition: FWL partials both $g(w_i)$ and $x_{i,- k}$ out of $x_{ik}$ to estimate $\beta_k$ \smallskip
+\vspace{-0.4cm}
+\begin{itemize}
+\item The trick to Angrist `98 was that this auxilliary regression identified a CEF (the p-score). But here $E[x_{ik}\mid w_i,x_{i,-k}]$ is inherently nonlinear\smallskip\pause{}
+\item FWL residual $\tilde{x}_{ik}$ is thus not mean-zero given $(w_i,x_{i,-k})$, so it ``picks up'' effects of other treatments $x_{ik}$ given $w_i$
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Is This a Problem?}
+\begin{itemize}
+\item In principle, contamination bias applies to a large number of settings:\smallskip
+\begin{enumerate}
+\item RCTs with multiple treatments and randomization strata\smallskip
+\item Selection-on-obs with multiple treatments (e.g. ``value-added'' models)\smallskip
+\item TWFE with multiple treatments (e.g. ``mover'' regressions)\smallskip
+\item IV with multiple instruments (e.g. ``examiner/judge'' IVs)\smallskip
+\item Descriptive regressions on multiple variables (e.g. disparity analyses)
+\end{enumerate}\bigskip\pause{}
+
+\item But again, the severity of the issue is an empirical matter\smallskip
+\begin{itemize}
+\item Since the CB weights average to zero, if they're uncorrelated with effect heterogeneity there's no issue\smallskip
+\item The weights are identified; we can estimate them to diagnose bias
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Solutions}
+\vspace{0.2cm}
+\begin{itemize}
+\item Contamination bias comes from the FWL auxilliary regression not controlling ``flexibly enough'' for $(w_i,x_{i,-k})$ ... but we can fix that:
+\begin{align*}
+y_i=\sum_k x_{ik}\beta_k +g(w_i) {\color{blue}{+\sum_k x_{ik}(q_k(w_i)-E[q_k(w_i)])}}+u_i
+\end{align*}
+The {\color{blue}{blue term}} captures non-linearities in $(w_i,x_{i})$ \smallskip\pause{}
+\begin{itemize}
+\item When $x_i\mid w_i$ is as-good-as-randomly assigned, $\beta_k$ identifies the ATE of treatment $k$ (Imbens and Wooldridge, 2009)\smallskip
+\item See our \emph{multe} Stata package for automating this + other CB checks
+\end{itemize}\bigskip\pause{}
+
+\item This works in principle, but in practice can fail / be really noisy \smallskip
+\begin{itemize}
+\item Key challenge: limited overlap ($p_k(w_i)$ may be close to zero or one)\smallskip
+\item If CB is limited, an uninteracted regression is likely more efficient...
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Solutions (Cont.)}
+\vspace{0.2cm}
+\begin{itemize}
+\item We could of course instead just focus on one treatment at a time:
+\begin{align*}
+y_i&=x_{ik}\beta_k +g(w_i) +u_i,
+\end{align*}
+just using observations where either $x_{ik}=1$ or $x_{i0}=1$\smallskip
+\begin{itemize}
+\item We know $\beta_k$ has no negative weights, and is likely precise because of the $Var(x_{ik}\mid w_i)$ weighting regression uses\smallskip\pause{}
+\item But the weights are $k$ specific, so $\beta_k$ is hard to compare across $k$
+\end{itemize}\bigskip\pause{}
+\item Goldsmith-Pinkham et al. (2024) derive an alternative estimator, which uses \emph{common} variance weights across treatments\smallskip
+\begin{itemize}
+\item Formally, we show this weighting scheme attains a semiparametric efficiency bound while still avoiding contaimination bias 
+\end{itemize}\bigskip\pause{}
+\item As before, whether any of these alternatives give a different answer than OLS is an empirical matter...
+\end{itemize}
+
+\end{frame}
+
+
 \begin{frame}{Example: Project STAR}
 
 \begin{itemize}
-\item Krueger (1999) studies the STAR RCT, which randomized 12k students in 80 public elementary schools in Tennessee to one of 3 classroom types:\smallskip
+\item Krueger (1999) studies the STAR RCT, which randomized students in public elementary to one of three classroom types:\smallskip
 \begin{enumerate}
 \item Regular-sized (20-25 students) -- Control\smallskip
 \item Small (13-17 students) -- Treatment 1\smallskip
@@ -399,7 +610,7 @@ for ex-ante weights $\phi_i = E[\tilde{x}_ix_i\mid w_i,\beta_i]$
 
 \item Kids were randomized within schools, so the propensity of assignment to each treatment varied by school\smallskip
 \begin{itemize}
-\item Krueger thus estimates: $TestScore_i= \alpha_{school(i)}+\beta_1 D_{i1} + \beta_2 D_{i2} +\varepsilon_i$
+\item Krueger thus estimates: $TestScore_i= \beta_1 x_{i1} + \beta_2 x_{i2} +\gamma_{school(i)}+ \varepsilon_i$
 \end{itemize}\bigskip\pause{}
 
 \item We find significant \emph{potential} for contamination bias: lots of treatment effect heterogeneity and variation in contamination weights\smallskip
@@ -426,6 +637,21 @@ for ex-ante weights $\phi_i = E[\tilde{x}_ix_i\mid w_i,\beta_i]$
 
 \end{frame}
 
+\begin{frame}{Does Contamination Bias Ever Matter?}
+\begin{itemize}
+\item On the ``advice'' of a referee, we added eight empirical applications:\smallskip
+\begin{itemize}
+\item Five stratified RCTs, like STAR \smallskip
+\item Three observational apps (analyses of multiple racial disparities)
+\end{itemize}\bigskip\pause{}
+\item Key finding: virtually no contamination bias in the experiments, but significant bias in 2/3rds of the observational regressions\smallskip
+\begin{itemize}
+\item Intuitively, experimental strata are unlikely to strongly predict TE heterogeneity (variation driven by experimenter constraints, etc.)
+\end{itemize}\bigskip\pause{}
+\item Practical takeaway: bias diagnostics can be useful, especially in observational analyses (use our \emph{multe} package!)
+\end{itemize}
+\end{frame}
+
 \begin{frame}{Outline}
 
 \textcolor{red!75!green!50!blue!25!gray}{1. Heterogeneous Treatment Effects}$\checkmark$
@@ -435,42 +661,48 @@ for ex-ante weights $\phi_i = E[\tilde{x}_ix_i\mid w_i,\beta_i]$
 
 \end{frame}
 
+\begin{frame}{Journey to the Red Arrow...}
+\begin{center}
+	\includegraphics[width=0.9\textwidth]{figures/BigPicture.png}
+\end{center}
+\end{frame}
+
 \begin{frame}{OLS Asymptotics: Review}
 
 \begin{itemize}
-\item Where do SEs come from? OLS $\hat\beta=(\mathbf{X}^\prime\mathbf{X})^{-1}\mathbf{X}^\prime\mathbf{Y}$ can be rewritten:
+\item Where do SEs come from? OLS $\hat\beta=(\mathbf{x}^\prime\mathbf{x})^{-1}\mathbf{x}^\prime\mathbf{y}$ can be rewritten:
 \begin{align*}
-\sqrt{N}(\hat\beta - \beta) = \left(\frac{\mathbf{X}^\prime\mathbf{X}}{N}\right)^{-1} \left(\frac{\mathbf{X}^\prime\boldsymbol\varepsilon}{\sqrt{N}}\right)
+\sqrt{N}(\hat\beta - \beta) = \left(\frac{\mathbf{x}^\prime\mathbf{x}}{N}\right)^{-1} \left(\frac{\mathbf{x}^\prime\boldsymbol\varepsilon}{\sqrt{N}}\right)
 \end{align*}
-where $\mathbf{Y}=\mathbf{X}\beta + \boldsymbol{\varepsilon}$ stacks observations of the population regression \smallskip\pause{}
+where $\mathbf{y}=\mathbf{x}\beta + \boldsymbol{\varepsilon}$ stacks observations of the population regression \smallskip\pause{}
 \begin{itemize}
-\item Under rather mild conditions (a LLN), $\frac{\mathbf{X}^\prime\mathbf{X}}{N}\xrightarrow{p}E\left[\frac{1}{N}\sum_i X_iX_i^\prime\right]$\smallskip\pause{}
-\item W/slightly stronger conditions (a CLT), $\frac{\mathbf{X}^\prime\boldsymbol\varepsilon}{\sqrt{N}}\Rightarrow \mathrm{N}(0,Var(\frac{1}{\sqrt{N}}\sum_i X_i\varepsilon_i))$
+\item Under rather mild conditions (a LLN), $\frac{\mathbf{x}^\prime\mathbf{x}}{N}\xrightarrow{p}E\left[\frac{1}{N}\sum_i x_ix_i^\prime\right]$\smallskip\pause{}
+\item W/slightly stronger conditions (a CLT), $\frac{\mathbf{x}^\prime\boldsymbol\varepsilon}{\sqrt{N}}\Rightarrow \mathrm{N}(0,Var(\frac{1}{\sqrt{N}}\sum_i x_i\varepsilon_i))$
 \end{itemize}\medskip\pause{}
 \item This gives our general asymptotic approximation for OLS: $\hat\beta\approx\beta^*$ for
 \end{itemize}
 \begin{align*}
-\beta^* \sim \mathrm{N}(\beta,\frac{V}{N}),\hspace{0.2cm} V=E\left[\frac{1}{N}\sum_i X_iX_i^\prime\right]^{-1} Var\left(\frac{1}{\sqrt{N}}\sum_i X_i\varepsilon_i\right) E\left[\frac{1}{N}\sum_i X_iX_i^\prime\right]^{-1}
+\beta^* \sim \mathrm{N}(\beta,V/N),\hspace{0.2cm} V=E\left[\frac{1}{N}\sum_i x_ix_i^\prime\right]^{-1} Var\left(\frac{1}{\sqrt{N}}\sum_i x_i\varepsilon_i\right) E\left[\frac{1}{N}\sum_i x_ix_i^\prime\right]^{-1}
 \end{align*}\pause{}
 \begin{itemize}
-\item SEs come from $\hat{V}=\left(\frac{1}{N}\sum_i X_iX_i^\prime\right)^{-1} \widehat{Var}\left(\frac{1}{\sqrt{N}}\sum_i X_i\varepsilon_i\right) \left(\frac{1}{N}\sum_i X_iX_i^\prime\right)^{-1}$
+\item SEs come from $\hat{V}=\left(\frac{1}{N}\sum_i x_ix_i^\prime\right)^{-1} \widehat{Var}\left(\frac{1}{\sqrt{N}}\sum_i x_i\varepsilon_i\right) \left(\frac{1}{N}\sum_i x_ix_i^\prime\right)^{-1}$
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Getting to the Meat of the ``Sandwich Estimator,'' $\hat{V}$}
 
 \begin{itemize}
-\item Key q: how do we form the variance estimate $\widehat{Var}\left(\frac{1}{\sqrt{N}}\sum_i X_i\varepsilon_i\right)$?\bigskip\pause{}
+\item Key q: how do we form the variance estimate $\widehat{Var}\left(\frac{1}{\sqrt{N}}\sum_i x_i\varepsilon_i\right)$?\bigskip\pause{}
 
-\item In \emph{iid} data, we know $Var\left(\frac{1}{\sqrt{N}}\sum_i X_i\varepsilon_i\right)=\pause{}\frac{1}{N}\sum_i Var(X_i\varepsilon_i)=\pause{}E[X_iX_i^\prime\varepsilon_i^2]$\smallskip
+\item In \emph{iid} data, we know $Var\left(\frac{1}{\sqrt{N}}\sum_i x_i\varepsilon_i\right)=\pause{}\frac{1}{N}\sum_i Var(x_i\varepsilon_i)=\pause{}E[x_ix_i^\prime\varepsilon_i^2]$\smallskip
 \begin{itemize}\pause{}
-\item This suggests $\widehat{Var}\left(\frac{1}{\sqrt{N}}\sum_i X_i\varepsilon_i^2\right)=\frac{1}{N}\sum_iX_iX_i^\prime\hat\varepsilon_i^2$, which leads to our usual heteroskedasticity-robust estimator
+\item This suggests $\widehat{Var}\left(\frac{1}{\sqrt{N}}\sum_i x_i\varepsilon_i^2\right)=\frac{1}{N}\sum_ix_ix_i^\prime\hat\varepsilon_i^2$ for $\hat\varepsilon_i=y_i-x\hat\beta$, which leads to our usual heteroskedasticity-robust estimator
 \end{itemize}\bigskip\pause{}
 
-\item The motivation for alternative estimators comes from the possibility that $X_i\varepsilon_i$ and $X_j\varepsilon_j$ may be correlated for $i\neq j$\smallskip
+\item The motivation for alternative estimators comes from the possibility that $x_i\varepsilon_i$ and $x_j\varepsilon_j$ may be correlated for $i\neq j$\smallskip
 \begin{itemize}
-\item Generally,  $Var\left(\frac{1}{\sqrt{N}}\sum_i X_i\varepsilon_i\right)=\frac{1}{N}\sum _i Var(X_i\varepsilon_i)+2\sum_{i,j\neq i}Cov(X_i\varepsilon_i,X_j\varepsilon_j)$\smallskip\pause{}
-\item But we can't allow for arbitrary cross-sectional correlations, since then we couldn't guarantee $\frac{1}{\sqrt{N}}\sum_i X_i\varepsilon_i$ converges ... \smallskip\pause{}
+\item Generally,  $Var\left(\frac{1}{\sqrt{N}}\sum_i x_i\varepsilon_i\right)=\frac{1}{N}\sum _i Var(x_i\varepsilon_i)+2\sum_{i,j\neq i}Cov(x_i\varepsilon_i,x_j\varepsilon_j)$\smallskip\pause{}
+\item But we can't allow for arbitrary cross-sectional correlations, since then we couldn't guarantee $\frac{1}{\sqrt{N}}\sum_i x_i\varepsilon_i$ converges ... \smallskip\pause{}
 \item We need to zero out some covariances to make progress
 \end{itemize}
 \end{itemize}
@@ -481,18 +713,18 @@ where $\mathbf{Y}=\mathbf{X}\beta + \boldsymbol{\varepsilon}$ stacks observation
 \item Suppose we can partition observations into clusters, $c(i)\in{1,\dots,C}$\smallskip
 \begin{itemize}
 \item To ease notation, suppose equal sizes: $|i:c(i)=c|=N/C\equiv T$\smallskip\pause{}
-\item With $N=CT$, OLS can be rewritten: $\sqrt{N}(\hat\beta - \beta) = \left(\frac{\mathbf{X}^\prime\mathbf{X}}{N}\right)^{-1}\cdot \left(\frac{\mathbf{X}^\prime\boldsymbol\varepsilon}{\sqrt{CT}}\right)$
+\item With $N=CT$, OLS can be rewritten: $\sqrt{N}(\hat\beta - \beta) = \left(\frac{\mathbf{x}^\prime\mathbf{x}}{N}\right)^{-1}\cdot \left(\frac{\mathbf{x}^\prime\boldsymbol\varepsilon}{\sqrt{CT}}\right)$
 \end{itemize}\medskip\pause{}
 
-\item Define $Q_c=\frac{1}{\sqrt T}\sum_{i:c(i)=c}X_i\varepsilon_i$ and note that $\frac{\mathbf{X}^\prime\boldsymbol\varepsilon}{\sqrt{CT}}=\frac{1}{\sqrt{C}}\sum_c Q_c$\smallskip\pause{}
+\item Define $q_c=\frac{1}{\sqrt T}\sum_{i:c(i)=c}x_i\varepsilon_i$ and note that $\frac{\mathbf{x}^\prime\boldsymbol\varepsilon}{\sqrt{CT}}=\frac{1}{\sqrt{C}}\sum_c q_c$\smallskip\pause{}
 \begin{itemize}
-\item If the $Q_c$ clusters are \emph{iid}, a CLT applies: $\frac{1}{\sqrt{C}}\sum_c Q_c\Rightarrow \mathrm{N}(0,Var(Q_c))$\smallskip
-\item E.g. in a balanced panel, could have \emph{iid} series $(X_{c1}\varepsilon_{c1}\dots,X_{cT}\varepsilon_{cT})$
+\item If the $q_c$ clusters are \emph{iid}, a CLT applies: $\frac{1}{\sqrt{C}}\sum_c q_c\Rightarrow \mathrm{N}(0,Var(q_c))$\smallskip
+\item E.g. in a balanced panel, could have \emph{iid} series $(x_{c1}\varepsilon_{c1}\dots,x_{cT}\varepsilon_{cT})$
 \end{itemize}\medskip\pause{}
 
 \item This gives us a new ``clustered'' variance estimate to plug into $\hat{V}$:
 \begin{align*}
-\widehat{Var}\left(\frac{1}{\sqrt{N}}\sum_i X_i\varepsilon_i\right)=\frac{1}{C}\sum_c \hat{Q}_c^2,\text{ for }\hat{Q}=\frac{1}{\sqrt{T}}\sum_{i:c(i)=c}X_i\hat\varepsilon_i
+\widehat{Var}\left(\frac{1}{\sqrt{N}}\sum_i x_i\varepsilon_i\right)=\frac{1}{C}\sum_c \hat{q}_c^2,\text{ for }\hat{q}=\frac{1}{\sqrt{T}}\sum_{i:c(i)=c}x_i\hat\varepsilon_i
 \end{align*}\pause{}
 
 \item This is what's going on under the hood when you ``\emph{, cluster(c)}''!
@@ -504,19 +736,19 @@ where $\mathbf{Y}=\mathbf{X}\beta + \boldsymbol{\varepsilon}$ stacks observation
 \begin{center}
 	\includegraphics[width=0.6\textwidth]{figures/khoa_cluster.jpg}
 \end{center}
-\hspace{\fill}Source: Khoa Vu (of course)
+\hspace{\fill}Source: Khoa Vu 
 \end{frame}
 
 \begin{frame}{Design Can Help!} 
 \begin{itemize}
-\item At an (unhelpfully) high level, the previous results tell us when to cluster $i$ and $j$ together: when we think $Cov(X_i\varepsilon_i,X_j\varepsilon_j)\neq 0$\bigskip\pause{}
-\item With design this may not be too hard to figure out:\smallskip
+\item At an (unhelpfully) high level, the previous results tell us when to cluster $i$ and $j$ together: when we think $Cov(x_i\varepsilon_i,x_j\varepsilon_j)\neq 0$\bigskip\pause{}
+\item With design, however, this may not be too hard to figure out:\smallskip
 \begin{itemize}
-\item Suppose $(X_1,\dots,X_N)
-\mid (\varepsilon_1,\dots,\varepsilon_N)$ is mean-zero with $X_i\independent X_j$ whenever $c(i)\neq c(j)$ (e.g. village-level RCT with $c(i)$ giving $i$'s village)\smallskip\pause{}
+\item Suppose $(x_1,\dots,x_N)
+\mid (\varepsilon_1,\dots,\varepsilon_N)$ is mean-zero with $x_i\independent x_j$ whenever $c(i)\neq c(j)$ (e.g. village-level RCT with $c(i)$ giving $i$'s village)\smallskip\pause{}
 \item Then whenever $c(i)\neq c(j)$: 
 \begin{align*}
-Cov(X_i\varepsilon_i,X_j\varepsilon_j)=E[X_iX_j^\prime\varepsilon_i\varepsilon_j]=\pause{}E[E[X_iX_j^\prime\mid \varepsilon_i,\varepsilon_j] \varepsilon_i\varepsilon_j]=\pause{} 0
+Cov(x_i\varepsilon_i,x_j\varepsilon_j)=E[x_ix_j^\prime\varepsilon_i\varepsilon_j]=\pause{}E[E[x_ix_j^\prime\mid \varepsilon_i,\varepsilon_j] \varepsilon_i\varepsilon_j]=\pause{} 0
 \end{align*}\vspace{-0.6cm}\pause{}
 \item So we only need to cluster by $c(i)$: the design tells us what to do!
 \end{itemize}\bigskip\pause{}
@@ -542,10 +774,9 @@ Cov(X_i\varepsilon_i,X_j\varepsilon_j)=E[X_iX_j^\prime\varepsilon_i\varepsilon_j
 \item Under constant effects, $E[\hat{V}]=V/2$; severe over-rejection!  
 \end{itemize}\bigskip\pause{}
 
-\item Paired randomization makes $X_i$ and $X_j$ \emph{negatively} correlated in pairs\smallskip
+\item Paired randomization makes $x_i$ and $x_j$ \emph{negatively} correlated in pairs\smallskip
 \begin{itemize}
-\item Clustering by pair solves this; treatment assignment is \emph{iid} across pairs \smallskip\pause{}
-\item Alternatively, you could  ``\emph{, r}'' with pair fixed effects (and the standard Stata d.f. correction). Why?\pause{} Because FE = FD when $T=2$
+\item Clustering by pair solves this; treatment assignment is \emph{iid} across pairs 
 \end{itemize}
 \end{itemize}
 
