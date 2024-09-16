@@ -1,3 +1,4 @@
+
 \documentclass[11pt,english]{beamer}
 %\documentclass[11pt]{beamer}
 \usepackage{mathptmx}
@@ -179,7 +180,7 @@
 \vspace{0.5cm}
 \title[]{Day 3: On Formulas and Models}
 \author{Peter Hull}
-\date{Design-Based Regression Inference \\Spring 2024} 
+\date{Design-Based Regression Inference \\Fall 2024} 
 \titlepage {\small{}\ }\thispagestyle{empty} \vspace{-30pt}
 
 \end{frame}
@@ -190,7 +191,7 @@
 1. Formula Treatments/Instruments
 \vspace{0.8cm}
 
-2. Structural Models
+2. Nonlinear/Structural Models
 
 \end{frame}
 
@@ -199,9 +200,9 @@
 \begin{itemize}
 \item We've seen how a regression of $y_i$ on $x_i$ and $w_i$ identifies a convex average of treatment effects when $E[x_i\mid y_i(\cdot),w_i]=E[x_i\mid w_i]=w_i^\prime\gamma$\smallskip
 \begin{itemize}
-\item For IV: $E[z_i\mid y_i(\cdot),w_i]=w_i^\prime\gamma$ and exclusion/monotonicity hold
+\item IV version: $E[z_i\mid y_i(\cdot),w_i]=w_i^\prime\gamma$ and exclusion/monotonicity hold
 \end{itemize}\bigskip\pause{}
-\item This gives us a strategy for robustly estimating causal effects with ``formula'' treatments/instruments, constructed from some exogenous shocks and other non-random variables\pause{}. E.g.: \smallskip
+\item As it turns out, this gives us a way to robustly estimate causal effects with ``formula'' treatments/instruments, constructed from some exogenous shocks and other non-random variables\pause{}. E.g.: \smallskip
 \begin{itemize}
 \item Interacted treatments: $x_i=s_ig_i$, with exogenous shocks $g_i$\smallskip\pause{}
 \item Shift-share instruments: $z_i=\sum_k s_{ik} g_k$, with exogenous shocks $\{g_k\}_{k=1}^K$\smallskip\pause{}
@@ -285,15 +286,82 @@ E[z_i\mid s,q]= E\left[\sum_k s_{ik} g_k\mid s,q\right]=\sum_k s_{ik} E[g_k\mid 
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Example: Autor et al. (2014)}
+\begin{frame}{Illustration: Autor et al. (2014) China Shock}
+
+\vspace{0.2cm}
+ADH study the effects of rising Chinese import competition on US commuting zones, 1991-2000 and 2000-2007\smallskip
+\begin{itemize}
+\item Treatment $x_{i t}$: local growth of Chinese imports in \$1,000/worker \smallskip
+\item Main outcome $y_{i t}$: local change in manufacturing employment share
+\end{itemize}\bigskip\pause{}
+
+To address endogeneity, ADH use a SSIV $z_{i t}=\sum_n s_{i n t} g_{n t}$ \smallskip
+\begin{itemize}
+\item $n$: 397 SIC4 manufacturing industries $\times$ two periods\smallskip
+\item $g_{nt}$: growth of Chinese imports in non-US economies per US worker\smallskip
+\item $s_{i n t}$: lagged share of manufacturing industry $n$ in \emph{total} employment of location $i$; hence $\sum_{n}s_{i n t}$ is $i$'s manufacturing employment share
+\end{itemize}\bigskip\pause{}
+
+Design-based justification: random industry productivity shocks in China, jointly affecting imports in the U.S. and elsewhere\smallskip
+\begin{itemize}
+\item Observed $g_{nt}$ proxy for latent as-if-randomly assigned productivity shocks; need other drivers to be unrelated to local U.S. conditions
+\end{itemize}
+\end{frame}
+
+\begin{frame}{ADH Balance Tests}
+\begin{center}
+	\includegraphics[width=1\textwidth]{figures/adh_balance.png}
+\end{center}
+\begin{itemize}
+\item Panel A regresses industry characteristics on the $g_{nt}$ shocks, controlling for period FE\smallskip
+\item Panel B regresses location characteristics on the $z_{it}$ instrument, controlling for manufacturing employment share $\times$ period FE
+\end{itemize}
+\end{frame}
+
+\begin{frame}{ADH Estimates}
 
 \begin{center}
-	\includegraphics[width=0.9\textwidth]{figures/adh_bhj.png}
+	\includegraphics[width=1\textwidth]{figures/adh_bhj.png}
 \end{center}
 
-From Borusyak et al. (2022); check out my SSIV mixtape for more!
+Note: columns 3-7 control for mfg. employment share $\times$ period FE
 
 
+\end{frame}
+
+\begin{frame}{Contrast: Outome Modeling}
+\begin{itemize}
+\item Goldsmith-Pinkham et al. (2020) discuss an alternative interpretation of shift-share IV, which models $E[\varepsilon_i\mid s_{i1},\dots,s_{iK},g]=E[\varepsilon_i\mid s_{i1},\dots,s_{iK}]$\smallskip
+\begin{itemize}
+\item Condition on the shocks, then assume the shares are exogenous in the sense of $E[\varepsilon_i\mid s_{i1},\dots,s_{iK}]=0$\smallskip
+\item When things are in first-differences, this is effectively parallel trends: e.g. regions with different exposure shares would have had the same outcome trends if not for shocks to treatment
+\end{itemize}\bigskip\pause{}
+\item Reasonable enough, but not design-based\smallskip
+\begin{itemize}
+\item Need an \emph{ex ante} stand on the right  form for $y_i$ (e.g. logs v levels)\smallskip
+\item Any transformation of $(s_{i1},\dots,s_{iK})$ is a valid instrument, including the individual shares $\rightarrow$ overidentified, potentially massively so\smallskip
+\item Can't have any unobserved shocks which transmit to $y_i$ through the same or correlated shares (e.g. can't have $\varepsilon_i=\sum_k s_{ik}\nu_k + \eta_i$, even if the $\nu_k$ are totally independent of the $g_k$)
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Going Beyond Linear Formula}
+\begin{itemize}
+\item All the $x_i$ and $z_i$ we've considered so far are linear in exogenous shocks\smallskip
+\begin{itemize}
+\item Linearity means a specification for $E[g\mid w]$ is enough to know $E[z\mid w]$
+\end{itemize}\bigskip\pause{}
+\item Can we consider nonlinear constructions? E.g. $z_i=\ln (\sum_k s_{ik}g_k)$ \smallskip
+\begin{itemize}
+\item Yes, but now to know $E[z\mid w]$ we generally need to specify the full \emph{distribution} of $g\mid w$ (let's call it $G(w)$)
+\end{itemize}\bigskip\pause{}
+\item This need not be as daunting as it seems! \smallskip\pause{}
+\begin{itemize}
+\item If $g\mid w$ comes from a true experiment, then $G(w)$ is given by the experimental protocol\smallskip\pause{}
+\item We might think some of the shocks are \emph{exchangeable}: e.g. swap which industries grew more vs. less in ADH (maybe within sectors)\smallskip\pause{}
+\item Could exploit other symmetries/discontinuities in the shocks (e.g. RD)
+\end{itemize}
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Formula Instruments: General Case}
@@ -301,7 +369,7 @@ From Borusyak et al. (2022); check out my SSIV mixtape for more!
 \item We have a $z_i=f_i(g,s)$ for known $f_i(\cdot)$ and observed $g$ and $s$\smallskip
 \begin{itemize}
 \item We assume $g\mid y(\cdot),w\sim G(w)$ for $w=(s,q)$ and known $G(\cdot)$\smallskip\pause{}
-\item E.g. $G(\cdot)$ is given by a randomization protocol or specifies permutations of the shocks which are as-good-as-random\smallskip\pause{}
+\item Reduced-form case: $z_i=x_i$; otherwise implicitly assuming exclusion\smallskip\pause{}
 \item Shocks may vary at a different ``level'' than observations
 \end{itemize}\bigskip\pause{}
 \item Design-based approach: include controls that span $\mu_i=E[f_i(g,s)\mid w]$\smallskip\pause{}
@@ -342,6 +410,14 @@ Naive OLS compares dark (``treatment'') vs light (``control'') regions
 
 \end{frame}
 
+\begin{frame}{Naive OLS Suggests a Big Market Access Effect...}
+\begin{center}
+	\includegraphics[width=0.9\textwidth]{figures/emp_ols_binscatter.pdf}
+\end{center}
+\vspace{-0.3cm}
+... but we probably shouldn't believe it
+\end{frame}
+
 \begin{frame}{HSR Lines and Counterfactuals}
 
 \begin{center}
@@ -349,6 +425,47 @@ Naive OLS compares dark (``treatment'') vs light (``control'') regions
 \end{center}
 
 Counterfactuals permute which lines opened by 2016, conditional on length
+
+\end{frame}
+
+\begin{frame}{An Example Counterfactual HSR Network}
+
+\begin{center}
+	\includegraphics[width=0.9\textwidth]{figures/BH_sim_lines_MA_2016_color.png}
+\end{center}
+
+Seems ok... 
+
+\end{frame}
+
+\begin{frame}{Expected Market Access Across Counterfactuals}
+
+\begin{center}
+	\includegraphics[width=0.9\textwidth]{figures/NlinkExpected2016.png}
+\end{center}
+
+Darker regions see more MA growth regardless of which lines are built first
+
+\end{frame}
+
+\begin{frame}{Recentered Market Access}
+
+\begin{center}
+	\includegraphics[width=0.9\textwidth]{figures/NlinkRecentered2016.png}
+\end{center}
+
+\vspace{-0.3cm}
+Recentered IV compares region that saw more MA growth than expected (in red) to those that saw less MA growth than expected (in blue)
+
+\end{frame}
+
+\begin{frame}{Balance Tests}
+
+\begin{center}
+	\includegraphics[width=0.9\textwidth]{figures/spec_test.png}
+\end{center}
+
+Recentered MA growth can't be reliably predicted from geography
 
 \end{frame}
 
@@ -362,6 +479,34 @@ Large effect for naive OLS goes away with recentering/controlling \smallskip
 \begin{itemize}
 \item Once adjusting for $\mu_i$, auxilliary controls don't matter ($\implies$ balance)
 \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Recentering for Power}
+
+\begin{itemize}
+\item Leveraging non-random exposure can dramatically improve precision when leveraging exogenous shocks in an IV...
+\begin{itemize}
+\item ... as long as you recenter to use this variation ``safely''
+\end{itemize}\medskip\pause{}
+
+\item Ex: Medicaid eligibility is a treatment combining statewide policy shocks and individual exposure (income, family structure, etc)
+\begin{itemize}
+\item In settings where policy shocks are plausibly exogenous, standard approach is to use them directly as instruments (``simulated IV'')
+\item BH approach: use eligibility itself, but recenter: e.g. adjust for $i$'s avg. eligibility across permutations of policies (swap MA \& RI, say)
+\end{itemize}\bigskip\pause{}
+\item In an application to ACA Medicaid expansions, we find this helps a lot\smallskip
+\begin{itemize}
+\item Design assumption: can swap expansion decisions of states conditional on whether the governor is a Republican or Democrat
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Estimates of Private Insurance Crowdout Effects}
+
+\begin{center}
+	\includegraphics[width=1\textwidth]{figures/aca_ss.png}
+\end{center}
 
 \end{frame}
 
@@ -384,13 +529,22 @@ Large effect for naive OLS goes away with recentering/controlling \smallskip
 \end{itemize}
 \end{frame}
 
+\begin{frame}{\emph{ssaggregate} in Stata}
+
+\begin{center}
+	\includegraphics[width=0.9\textwidth]{figures/ssaggregate.png}
+\end{center}
+This is what I used to get SEs in the previous balance / IV tables
+
+\end{frame}
+
 
 \begin{frame}{Outline}
 
 \textcolor{red!75!green!50!blue!25!gray}{1. Formula Treatments/Instruments}$\checkmark$
 \vspace{0.8cm}
 
-2. Structural Models
+2. Nonlinear/Structural Models
 
 \end{frame}
 
@@ -408,7 +562,31 @@ Large effect for naive OLS goes away with recentering/controlling \smallskip
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Simple Example: OLS vs. Probit}
+\begin{frame}{Primer: Probit in Saturated Models}
+
+\vspace{0.2cm}
+\begin{itemize}
+\item Suppose you run an RCT with a binary treatment $x_i$. A regression of $y_i$ on $x_i$ identifies $E[y_i\mid x_i=1]-E[y_i\mid x_i=0]=E[y_i(1)-y_i(0)]$\smallskip
+\begin{itemize}
+\item What changes if $y_i$ is also binary?\pause{} Nothing.
+\end{itemize}\bigskip\pause{}
+
+\item Now suppose the true model for $y_i\mid x_i$ is a Probit:
+\begin{align*}
+y_i&=\mathbf{1}[y_i^*\ge 0]\\
+y_i^*&=\alpha+\beta x_i - \varepsilon_i\\
+\varepsilon_i\mid & x_i \sim \mathrm{N}(0,\sigma^2)
+\end{align*}\pause{}\vspace{-0.3cm}
+
+\item The CEF implied by this model is linear, so regression fits it perfectly
+\begin{align*}
+E[y_i\mid x_i]&=Pr(y_i^*\ge 0\mid x_i) =\pause{} \Phi\left(\frac{\alpha + \beta x_i}{\sigma}\right) \\
+&=\pause{} \underbrace{\Phi\left(\frac{\alpha}{\sigma}\right)}_{\text{constant}} + \underbrace{\left\{\Phi\left(\frac{\alpha+\beta}{\sigma}\right)-\Phi\left(\frac{\alpha}{\sigma}\right)\right\}}_{\text{slope coefficient}}x_i 
+\end{align*}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Extrapolation by OLS vs. Probit}
 \begin{itemize}
 \item Suppose individuals with baseline covariate $w_i=1$ are randomized into a treatment $x_i\in\{0,1\}$. Those with $w_i=0$ are all untreated\smallskip\pause{}
 \begin{itemize}
@@ -423,7 +601,7 @@ Large effect for naive OLS goes away with recentering/controlling \smallskip
  y_i=& \mathbf{1}[\alpha+\beta x_i+\gamma w_i\ge\varepsilon_i],\hspace{0.3cm} \varepsilon_i\mid x_i,w_i\sim N(0,1) \\
 \pause{} \implies &  y_i(0)=\mathbf{1}[\alpha+\gamma w_i\ge \varepsilon_i],\hspace{0.2cm}y_i(1)=\mathbf{1}[\alpha+\beta + \gamma w_i\ge \varepsilon_i]
 \end{align*}\pause{}\vspace{-0.2cm}
-\item In particular, $E[y_i(1)-y_i(0)\mid w_i=1]=\Phi(\alpha+\beta+\gamma)-\Phi(\alpha+\gamma)$ (will match OLS) but $E[y_i(1)-y_i(0)\mid w_i=0]=\Phi(\alpha+\beta)-\Phi(\alpha)$\smallskip\pause{}
+\item In particular, $E[y_i(1)-y_i(0)\mid w_i=1]=\Phi(\alpha+\beta+\gamma)-\phi(\alpha+\gamma)$ (will match OLS) but $E[y_i(1)-y_i(0)\mid w_i=0]=\Phi(\alpha+\beta)-\Phi(\alpha)$\smallskip\pause{}
 \item Different extrapolation of missing CATE: a feature or a bug?
 \end{itemize}
 \end{itemize}
@@ -451,7 +629,9 @@ where $x_i(z)$ denotes potential treatment when $z_i=z$\smallskip
 
 \begin{frame}{Adding Structure to IV}
 
-Suppose we have a $z_i$ which is as-good-as-randomly assigned + excludable\smallskip
+\vspace{0.2cm}
+\begin{itemize}
+\item Suppose we have a $z_i$ which is as-if-randomly assigned + excludable\smallskip
 \begin{itemize}
 \item Assume a distribution for $(y_i(1),y_i(0),\nu_i)$ where $x_i=\mathbf{1}[\mu+\pi z_i>\nu_i]$\smallskip\pause{}
 \item Then we have parametric models for
@@ -463,27 +643,29 @@ as well as ``first stage'' models for $Pr(x_i=1\mid z_i=z)=g(z;\theta)$ \pause{}
 \item With enough variation in $z_i$, the parameter vector $\theta$ (and thus ATE) can be identified from these moment restrictions 
 \end{itemize}\bigskip\pause{}
 
-Key point: the model allows us to extrapolate ``local'' IV variation to estimate more ``policy relevant'' parameters\smallskip
+\item Key point: the model allows us to extrapolate ``local'' IV variation to estimate more ``policy relevant'' parameters\smallskip
 \begin{itemize}
 \item When $z_i$ has limited support, the model is doing more ``work''\smallskip
 \item With full support, we have ``identification at infinity'' (w/o a model)
 \end{itemize}
-
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Linking Back to LATE}
 
 \vspace{0.2cm}
-Kline and Walters (2019) formalize this extrapolation logic in the familiar Imbens and Angrist (1994) setup\smallskip
+\begin{itemize}
+\item Kline and Walters (2019) formalize this extrapolation logic in the familiar Imbens and Angrist (1994) setup\smallskip
 \begin{itemize}
 \item Key result: in simple binary $z_i$ / no controls setup, control function estimates of LATE are numerically identical to linear IV\smallskip\pause{}
 \item ``Differences between structural and IV estimates therefore stem in canonical cases entirely from disagreements about the target parameter rather than from functional form assumptions'' (p. 678)\smallskip\pause{}
 \item Functional form instead shapes the extrapolation to other parameters (as in our earlier probit example!)
 \end{itemize}\bigskip\pause{}
 
-All of this can be extended to conditional as-good-as-random assignment 
+\item This can all be extended to conditional as-if-random assignment \smallskip
 \begin{itemize}
 \item Design knowledge gives you reduced-form estimands; then plug these into a model to get more!
+\end{itemize}
 \end{itemize}
 
 \end{frame}
@@ -502,7 +684,8 @@ All of this can be extended to conditional as-good-as-random assignment
 \item Give a clear \emph{ex ante} rationalization for controls in a linear regression/IV\smallskip
 \item Have confidence in the level of standard error clustering\smallskip
 \item Avoid concerns over ``negative weights'' / explore alternative weightings\smallskip
-\item Understand what economic models buy you for identification
+\item Access a large class of formula treatments/IVs\smallskip
+\item Understand what nonlinear/structural models buy you for identification
 \end{itemize}\bigskip\pause{}
 \item Of course, design is not the only way to go: outcome modeling (e.g. DiD) may be a good alternative, especially w/o good shock variation\smallskip
 \begin{itemize}
@@ -515,6 +698,7 @@ All of this can be extended to conditional as-good-as-random assignment
 \end{itemize}
 
 \end{frame}
+
 
 \end{document}
 }
